@@ -19,7 +19,7 @@ type FormData = {
   password: string;
 };
 
-const login: React.FC<loginProps> = ({}) => {
+const signup: React.FC<loginProps> = ({}) => {
   const { register, handleSubmit, formState, errors } = useForm<FormData>();
   const onSubmit = handleSubmit(({ email, password }) => {
     console.log("email:", email, "password:", password);
@@ -52,7 +52,7 @@ const login: React.FC<loginProps> = ({}) => {
             isLoading={formState.isSubmitting}
             type="submit"
           >
-            LOGIN
+            SIGNUP
           </Button>
         </form>
       </Flex>
@@ -60,4 +60,4 @@ const login: React.FC<loginProps> = ({}) => {
   );
 };
 
-export default login;
+export default signup;
