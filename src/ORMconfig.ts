@@ -1,4 +1,6 @@
 import { ConnectionOptions } from "typeorm";
+import { User } from "./entity/User";
+import { Post } from "./entity/Post";
 export default {
   type: "postgres",
   database: "blend-blog",
@@ -6,5 +8,5 @@ export default {
   password: "postgres",
   logging: true,
   synchronize: true,
-  entities: [],
+  entities: [Post, User],
 } as ConnectionOptions;
