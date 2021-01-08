@@ -21,7 +21,7 @@ const login: React.FC<loginProps> = ({}) => {
   let { mutate: loginUser } = useMutation(Login);
   const onSubmit = handleSubmit(async (data: UserFormData) => {
     try {
-      let user = await loginUser(data);
+      let user = loginUser(data);
       console.log(user);
     } catch (e) {}
   });
