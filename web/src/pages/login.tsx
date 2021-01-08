@@ -32,12 +32,18 @@ const login: React.FC<loginProps> = ({}) => {
           <FormControl>
             <Stack spacing={3} w="500px">
               <Box>
-                <FormLabel htmlFor="email">Email</FormLabel>
+                <FormLabel htmlFor="login-email">Email</FormLabel>
                 <Input name="email" placeholder="email" ref={register} />
               </Box>
               <Box>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <Input name="password" placeholder="password" ref={register} />
+                <FormLabel htmlFor="login-password">Password</FormLabel>
+                <Input
+                  name="password"
+                  id="password-login"
+                  placeholder="password"
+                  type="password"
+                  ref={register}
+                />
               </Box>
             </Stack>
           </FormControl>

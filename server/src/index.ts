@@ -9,13 +9,19 @@ import ormconfig from "./ORMconfig";
 import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
 import userRoutes from "./routes/user.routes";
+import errorMiddleware from "./middleware/error.middleware";
 const PORT = 4000;
 
 const main = async () => {
   await createConnection(ormconfig);
   const app = express()
     .use(morgan("dev"))
-    .use(cors())
+    .use(
+      cors({
+        origin: "http://localhost:3000",
+        credentials: true,
+      })
+    )
     .use(bodyParser.urlencoded({ extended: false }))
     .use(bodyParser.json())
     .use(
@@ -23,12 +29,15 @@ const main = async () => {
         cookie: {
           path: "/",
           maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
+          secure: true,
         },
-        secret: "some-secret-here",
+        secret: "blending in",
         resave: false,
         saveUninitialized: true,
       })
-    );
+    )
+    .use(errorMiddleware);
+  app.set("trust proxy", 1);
 
   app.get("/", (_, res) => {
     res.json("TAP TAP TAP IN");

@@ -2,6 +2,6 @@ import { Router } from "express";
 import { createPost } from "../controllers/post.controller";
 const router = Router();
 
-router.get("/posts", createPost);
+router.post("/", createPost);
 
 export default router;

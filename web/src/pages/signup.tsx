@@ -46,7 +46,13 @@ const signup: React.FC<loginProps> = ({}) => {
               </Box>
               <Box>
                 <FormLabel htmlFor="password">Password</FormLabel>
-                <Input name="password" placeholder="password" ref={register} />
+                <Input
+                  name="password"
+                  id="password"
+                  placeholder="password"
+                  type="password"
+                  ref={register}
+                />
               </Box>
             </Stack>
           </FormControl>
