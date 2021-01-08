@@ -2,7 +2,6 @@ import { Input } from "@chakra-ui/input";
 import {
   FormControl,
   FormLabel,
-  FormErrorMessage,
   Button,
   Stack,
   Box,
@@ -10,19 +9,30 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { Signup } from "../api/authApi";
 import { Layout } from "../components/Layout";
-
-interface loginProps {}
+import { useMutation } from "react-query";
+import { useRouter } from "next/router";
+import { UserFormData } from "../../types";
 
 type FormData = {
   email: string;
   password: string;
 };
 
+interface loginProps {}
 const signup: React.FC<loginProps> = ({}) => {
-  const { register, handleSubmit, formState, errors } = useForm<FormData>();
-  const onSubmit = handleSubmit(({ email, password }) => {
-    console.log("email:", email, "password:", password);
+  const { register, handleSubmit, formState } = useForm<FormData>();
+  const { mutate: signupUser } = useMutation(Signup);
+  const router = useRouter();
+  const onSubmit = handleSubmit(async (data: UserFormData) => {
+    try {
+      signupUser(data, {
+        onSuccess: () => {
+          router.push("/login");
+        },
+      });
+    } catch (e) {}
   });
   return (
     <Layout>
@@ -33,16 +43,10 @@ const signup: React.FC<loginProps> = ({}) => {
               <Box>
                 <FormLabel htmlFor="email">Email</FormLabel>
                 <Input name="email" placeholder="email" ref={register} />
-                <FormErrorMessage>
-                  {errors.email && errors.email.message}
-                </FormErrorMessage>
               </Box>
               <Box>
                 <FormLabel htmlFor="password">Password</FormLabel>
                 <Input name="password" placeholder="password" ref={register} />
-                <FormErrorMessage>
-                  {errors.password && errors.password.message}
-                </FormErrorMessage>
               </Box>
             </Stack>
           </FormControl>
