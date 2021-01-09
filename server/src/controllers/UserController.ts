@@ -1,0 +1,46 @@
+import argon2 from "argon2";
+import { IUserInput } from "./../../types.d";
+import { getRepository } from "typeorm";
+import { Request, Response } from "express";
+import { User } from "../entity/User";
+import { validateRegister } from "../utils/ValidateRegister";
+
+class UserController {
+  static getSingleUser = async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    try {
+      const user = getRepository(User).findOneOrFail(id);
+      res.send(user);
+      return;
+    } catch (error) {
+      res.status(404).send("User not found");
+    }
+  };
+
+  static newUser = async (req: Request, res: Response) => {
+    let { email, password, username } = req.body;
+    let user: IUserInput = {
+      email: email,
+      username: username,
+      password: password,
+    };
+
+    const errors = validateRegister(user);
+    if (errors) {
+      res.status(400).send({ errors });
+      return;
+    }
+
+    const hashedPass = await argon2.hash(user.password);
+    user.password = hashedPass;
+    try {
+      await getRepository(User).create(user).save();
+      return;
+    } catch (err) {
+      res.status(409).send("already in use");
+      return;
+    }
+  };
+}
+
+export default UserController;

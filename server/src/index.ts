@@ -9,12 +9,13 @@ import ormconfig from "./ORMconfig";
 import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
 import userRoutes from "./routes/user.routes";
-import errorMiddleware from "./middleware/error.middleware";
+import { COOKIE_NAME } from "./constants";
 const PORT = 4000;
 
 const main = async () => {
   await createConnection(ormconfig);
   const app = express()
+    .set("trust proxy", 1)
     .use(morgan("dev"))
     .use(
       cors({
@@ -26,6 +27,7 @@ const main = async () => {
     .use(bodyParser.json())
     .use(
       session({
+        name: COOKIE_NAME,
         cookie: {
           path: "/",
           maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
@@ -35,9 +37,7 @@ const main = async () => {
         resave: false,
         saveUninitialized: true,
       })
-    )
-    .use(errorMiddleware);
-  app.set("trust proxy", 1);
+    );
 
   app.get("/", (_, res) => {
     res.json("TAP TAP TAP IN");

@@ -1,15 +1,15 @@
 import { Timestamp } from "typeorm";
 import { User } from "./src/entity/User";
 import { Post } from "./src/entity/Post";
+import { Request, Response } from "express";
+import { Session } from "express-session";
 
-declare global {
-  namespace Express {
-    interface Session {
-      _userID?: number;
-    }
-  }
-}
-export type IUserResponse = IUser | User;
+export type MyContext = {
+  req: Request & { session?: Session & { userId?: number } };
+  res: Response;
+};
+
+import e from "express";
 export interface IUser {
   id: number;
   email: string;
@@ -17,11 +17,11 @@ export interface IUser {
   createdAt: Date;
 }
 
-export interface IError {
-  Message: string;
-  error: string;
+export interface IUserInput {
+  email: string;
+  password: string;
+  username: string;
 }
-
 interface IPost {
   id: number;
   title: string;
@@ -29,4 +29,17 @@ interface IPost {
   creatorId: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Session {
+  id: number;
+  dateCreated: number;
+  username: string;
+  issued: number;
+  expires: number;
+}
+export interface EncodeResult {
+  token: string;
+  expires: number;
+  issued: number;
 }

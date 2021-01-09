@@ -1,16 +1,12 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { getRepository } from "typeorm";
-import { IPost } from "../../types";
 import { Post } from "../entity/Post";
-import { HttpException } from "../exceptions/HttpExeption";
-
 export const createPost = async (
   req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<Response<IPost> | void> => {
+  res: Response
+): Promise<Response> => {
   try {
-    console.log("session", req.session?._userID);
+    console.log();
     let post = await getRepository(Post)
       .create({
         title: req.body.title,
@@ -18,18 +14,10 @@ export const createPost = async (
         creatorId: req.session!.userId,
       })
       .save();
-    let postRes: IPost = {
-      id: post.id,
-      title: post.title,
-      body: post.body,
-      creatorId: post.creatorId,
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
-    };
-    console.log(postRes);
-    return res.send(postRes);
+
+    return res.send(post);
   } catch (error) {
-    next(new HttpException(500, error));
+    return res.status(500).send(error);
   }
 };
 
