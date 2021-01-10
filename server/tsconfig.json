@@ -26,6 +26,5 @@
   },
   "exclude": ["node_modules"],
   "compileOnSave": true,
-  "include": ["./src/**/*.tsx", "./src/**/*.ts", "@types/express/index.d.ts"],
-  "files": ["types.d.ts"]
+  "include": ["./src/**/*.tsx", "./src/**/*.ts", "@types/express/index.d.ts"]
 }

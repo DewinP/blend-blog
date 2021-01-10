@@ -24,26 +24,20 @@ const main = async () => {
     )
     .use(bodyParser.urlencoded({ extended: false }))
     .use(bodyParser.json())
-    .use(passport.initialize())
     .use(
       session({
-        cookie: {
-          path: "/",
-          maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
-          secure: true,
-        },
-        secret: "blending in",
+        secret: "cat",
         resave: false,
         saveUninitialized: true,
       })
-    );
-  app.set("trust proxy", 1);
+    )
+    .use(passport.initialize())
+    .use(passport.session());
   passport.use(passportMiddleware);
 
   app.get("/", (_, res) => {
     res.json("INDEX PAGE");
   });
-
   app.use("/api/auth", authRoutes);
   app.use("/api/posts", postRoutes);
   app.use("/api/users", userRoutes);

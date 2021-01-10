@@ -12,8 +12,8 @@ import { Post } from "./Post";
 
 @Entity()
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Column({ unique: true })
   @IsEmail()
@@ -23,7 +23,7 @@ export class User extends BaseEntity {
   @IsEmail()
   username!: string;
 
-  @Column({ select: false })
+  @Column()
   @Length(4, 20)
   password!: string;
 

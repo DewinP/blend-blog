@@ -1,5 +1,5 @@
 import argon2 from "argon2";
-import { IUserInput } from "./../../types.d";
+import { IUserInput } from "../types";
 import { getRepository } from "typeorm";
 import { Request, Response } from "express";
 import { User } from "../entity/User";

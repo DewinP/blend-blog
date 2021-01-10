@@ -5,26 +5,18 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
 } from "typeorm";
-import { User } from "./User";
 
-@Entity("posts")
-export class Post extends BaseEntity {
+@Entity("favorite_posts")
+export class FavoritePosts extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
-  id!: string;
-
-  @Column({ unique: true })
-  title!: string;
+  id!: number;
 
   @Column()
-  body!: string;
+  postID: string;
 
   @Column()
-  creatorId: string;
-
-  @ManyToOne(() => User, (user) => user.posts)
-  creator: User;
+  userID: string;
 
   @CreateDateColumn()
   createdAt: Date;
