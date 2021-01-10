@@ -35,11 +35,11 @@ class UserController {
     user.password = hashedPass;
     try {
       await getRepository(User).create(user).save();
-      return;
     } catch (err) {
       res.status(409).send("already in use");
-      return;
     }
+
+    return res.send("User created");
   };
 }
 

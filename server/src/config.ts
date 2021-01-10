@@ -2,7 +2,7 @@ import { ConnectionOptions } from "typeorm";
 import { Post } from "./entity/Post";
 import { User } from "./entity/User";
 
-export default {
+export const ORMConfig = {
   type: "postgres",
   database: "blend-blog",
   username: "postgres",
@@ -11,3 +11,5 @@ export default {
   synchronize: true,
   entities: [Post, User],
 } as ConnectionOptions;
+
+export const jwtSecret = "TokenPasswordSecret";

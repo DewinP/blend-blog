@@ -1,22 +1,16 @@
+import { IUser } from "./types.d";
 import { Timestamp } from "typeorm";
 import { User } from "./src/entity/User";
 import { Post } from "./src/entity/Post";
 import { Request, Response } from "express";
 import { Session } from "express-session";
 
-export type MyContext = {
-  req: Request & { session?: Session & { userId?: number } };
-  res: Response;
-};
-
-import e from "express";
 export interface IUser {
   id: number;
   email: string;
   posts: Post[] | [];
   createdAt: Date;
 }
-
 export interface IUserInput {
   email: string;
   password: string;
