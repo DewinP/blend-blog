@@ -2,9 +2,6 @@ import { Request, Response } from "express";
 import { getRepository } from "typeorm";
 import { HttpStatusEnum } from "../types";
 import { Post } from "../entity/Post";
-import { HttpExeption } from "../exception/HttpExeption";
-import { title } from "process";
-import { idText } from "typescript";
 class PostController {
   static createPost = async (
     req: Request,
@@ -22,10 +19,9 @@ class PostController {
           creatorId: req.user_ID,
         })
         .save();
-      return res.status(HttpStatusEnum.CREATED).json({ post: post })
-      );
+      return res.status(HttpStatusEnum.CREATED).json({ post: post });
     } catch (error) {
-      return res.status(HttpStatusEnum.SERVER_ERROR).json({error: error})
+      return res.status(HttpStatusEnum.SERVER_ERROR).json({ error: error });
     }
   };
 
@@ -33,9 +29,9 @@ class PostController {
     try {
       console.log(res.locals);
       const posts: Post[] = await getRepository(Post).find();
-      return res.json({posts : posts})
+      return res.json({ posts: posts });
     } catch (error) {
-      return res.status(HttpStatusEnum.NOT_FOUND).json({error: error})
+      return res.status(HttpStatusEnum.NOT_FOUND).json({ error: error });
     }
   };
 
@@ -50,7 +46,7 @@ class PostController {
     });
 
     if (post) {
-      return res.json({ post: post })
+      return res.json({ post: post });
     } else
       return res.status(HttpStatusEnum.NOT_FOUND).json("Post doesnt not exist");
   };
@@ -60,7 +56,7 @@ class PostController {
     res: Response
   ): Promise<Response> => {
     let { title, body } = req.body;
-    if(!(title&&body)){
+    if (!(title && body)) {
       return res.status(HttpStatusEnum.BAD_REQUEST).json("Empty fields");
     }
 
@@ -77,10 +73,7 @@ class PostController {
     let post: Post = result.raw[0];
     if (post) {
       return res.json({ post: post });
-    } else
-      return res.status(HttpStatusEnum.UNAUTHORIZED).json(
-        "Unathorized"
-      );
+    } else return res.status(HttpStatusEnum.UNAUTHORIZED).json("Unathorized");
   };
 
   static deletePost = async (
@@ -88,11 +81,10 @@ class PostController {
     res: Response
   ): Promise<Response> => {
     const post = await getRepository(Post).findOne(req.params.id);
-    if (!post){
-      res.status(HttpStatusEnum.NOT_FOUND).json("Post not found")
-    }
-    else if(post.creatorId !== req.user_ID){
-      res.status(HttpStatusEnum.UNAUTHORIZED).json("Post not found")
+    if (!post) {
+      res.status(HttpStatusEnum.NOT_FOUND).json("Post not found");
+    } else if (post.creatorId !== req.user_ID) {
+      res.status(HttpStatusEnum.UNAUTHORIZED).json("Post not found");
     }
     await Post.delete(req.params.id);
 

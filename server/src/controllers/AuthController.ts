@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 import { getRepository, getConnection } from "typeorm";
 import { HttpStatusEnum, IUser, IUserInput } from "../types";
 import { User } from "../entity/User";
-import { HttpExeption } from "../exception/HttpExeption";
 import { jwtSecret } from "../config";
 import * as jwt from "jsonwebtoken";
 
