@@ -1,10 +1,18 @@
 import axios from "axios";
 import { SERVER } from "../../constants";
 import { UserFormData } from "../../types";
-
+import { ILoginData } from "../interfaces";
 export const Signup = async (FormData: UserFormData) => {
-  const { data } = await axios.post(`${SERVER}/auth/signup`, FormData);
-  return data;
+  try {
+    let data: ILoginData = await axios.post(
+      `${SERVER}/auth/register`,
+      FormData
+    );
+    localStorage.setItem("TOKEN_INFO", data.token);
+    return data.user;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const Login = async (FormData: UserFormData) => {
