@@ -26,13 +26,11 @@ const signup: React.FC<loginProps> = ({}) => {
   const { mutate: signupUser } = useMutation(Signup);
   const router = useRouter();
   const onSubmit = handleSubmit(async (data: UserFormData) => {
-    try {
-      signupUser(data, {
-        onSuccess: () => {
-          router.push("/login");
-        },
-      });
-    } catch (e) {}
+    signupUser(data, {
+      onSuccess: () => {
+        router.push("/login");
+      },
+    });
   });
   return (
     <Layout>
@@ -40,6 +38,10 @@ const signup: React.FC<loginProps> = ({}) => {
         <form onSubmit={onSubmit}>
           <FormControl>
             <Stack spacing={3} w="500px">
+              <Box>
+                <FormLabel htmlFor="userame">Username</FormLabel>
+                <Input name="username" placeholder="username" ref={register} />
+              </Box>
               <Box>
                 <FormLabel htmlFor="email">Email</FormLabel>
                 <Input name="email" placeholder="email" ref={register} />

@@ -3,31 +3,39 @@ import { Layout } from "../components/Layout";
 import {
   Button,
   Flex,
+  Heading,
   Input,
   InputGroup,
   InputRightElement,
+  Spinner,
   Stack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { CreatePost } from "../components/createPost";
-import { AiOutlineForm } from "react-icons/ai";
+import { useQuery } from "react-query";
 import { FiSearch } from "react-icons/fi";
+import { fetchAllPosts } from "../api/postApi";
+import { PostPreview } from "../components/PostPreview";
 
 const Index = () => {
-  const { isOpen, onToggle, onClose } = useDisclosure();
   const [searchTerm, setSearchTerm] = useState("");
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
-  // const [searchResults, setSearchResults] = useState([]);
-  // useEffect(() => {
-  //   if (postData?.communityPosts) {
-  //     const results = postData?.communityPosts.filter((p) =>
-  //       p.title.toLowerCase().includes(searchTerm)
-  //     );
-  //     setSearchResults(results);
-  //   }
-  // }, [searchTerm, postData?.communityPosts]);
+  const { data, isLoading } = useQuery("posts", fetchAllPosts);
+  if (isLoading) {
+    <Layout>
+      <Flex justify="center" align="center" height="100vh">
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Flex>
+    </Layout>;
+  }
+
   return (
     <Layout>
       <Flex
@@ -43,19 +51,12 @@ const Index = () => {
           />
           <InputRightElement p={0} children={<FiSearch />} />
         </InputGroup>
-        <Button
-          size="sm"
-          m={{ base: 0, sm: 2 }}
-          colorScheme="teal"
-          onClick={onToggle}
-          rightIcon={<AiOutlineForm />}
-        >
-          Create Post
-        </Button>
       </Flex>
-
-      <CreatePost isOpen={isOpen} onClose={onClose} />
-      <Stack></Stack>
+      <Stack>
+        {data?.map((p) => {
+          return <PostPreview key={p.id} p={p} />;
+        })}
+      </Stack>
     </Layout>
   );
 };

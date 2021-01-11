@@ -23,7 +23,9 @@ const login: React.FC<loginProps> = ({}) => {
     try {
       let user = loginUser(data);
       console.log(user);
-    } catch (e) {}
+    } catch (err) {
+      console.error(err);
+    }
   });
   return (
     <Layout>
@@ -32,8 +34,8 @@ const login: React.FC<loginProps> = ({}) => {
           <FormControl>
             <Stack spacing={3} w="500px">
               <Box>
-                <FormLabel htmlFor="login-email">Email</FormLabel>
-                <Input name="email" placeholder="email" ref={register} />
+                <FormLabel htmlFor="username">Username</FormLabel>
+                <Input name="username" placeholder="username" ref={register} />
               </Box>
               <Box>
                 <FormLabel htmlFor="login-password">Password</FormLabel>
