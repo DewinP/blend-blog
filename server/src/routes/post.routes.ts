@@ -1,7 +1,10 @@
 import { Router } from "express";
-import { createPost } from "../controllers/post.controller";
+import PostController from "../controllers/PostController";
+import Authorization from "../middleware/Authorization";
 const router = Router();
 
-router.get("/posts", createPost);
+router.post("/", Authorization, PostController.createPost);
+router.get("/:id", PostController.singlePost);
+router.get("/", PostController.allPosts);
 
 export default router;

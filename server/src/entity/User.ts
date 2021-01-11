@@ -1,3 +1,4 @@
+import { IsEmail, Length } from "class-validator";
 import {
   Entity,
   Column,
@@ -9,23 +10,30 @@ import {
 } from "typeorm";
 import { Post } from "./Post";
 
-@Entity("users")
+@Entity()
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, select: false })
+  @IsEmail()
   email!: string;
 
-  @Column()
+  @Column({ unique: true })
+  username!: string;
+
+  @Column({ select: false })
+  @Length(4, 20)
   password!: string;
 
   @OneToMany(() => Post, (post) => post.creator)
   posts: Post[];
 
+  @Column()
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column()
   @UpdateDateColumn()
   updatedAt: Date;
 }

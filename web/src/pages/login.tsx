@@ -2,7 +2,6 @@ import { Input } from "@chakra-ui/input";
 import {
   FormControl,
   FormLabel,
-  FormErrorMessage,
   Button,
   Stack,
   Box,
@@ -10,19 +9,21 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useMutation } from "react-query";
+import { UserFormData } from "../../types";
+import { Login } from "../api/authApi";
 import { Layout } from "../components/Layout";
 
 interface loginProps {}
 
-type FormData = {
-  email: string;
-  password: string;
-};
-
 const login: React.FC<loginProps> = ({}) => {
-  const { register, handleSubmit, formState, errors } = useForm<FormData>();
-  const onSubmit = handleSubmit(({ email, password }) => {
-    console.log("email:", email, "password:", password);
+  const { register, handleSubmit, formState } = useForm<UserFormData>();
+  let { mutate: loginUser } = useMutation(Login);
+  const onSubmit = handleSubmit(async (data: UserFormData) => {
+    try {
+      let user = loginUser(data);
+      console.log(user);
+    } catch (e) {}
   });
   return (
     <Layout>
@@ -31,18 +32,18 @@ const login: React.FC<loginProps> = ({}) => {
           <FormControl>
             <Stack spacing={3} w="500px">
               <Box>
-                <FormLabel htmlFor="email">Email</FormLabel>
+                <FormLabel htmlFor="login-email">Email</FormLabel>
                 <Input name="email" placeholder="email" ref={register} />
-                <FormErrorMessage>
-                  {errors.email && errors.email.message}
-                </FormErrorMessage>
               </Box>
               <Box>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <Input name="password" placeholder="password" ref={register} />
-                <FormErrorMessage>
-                  {errors.password && errors.password.message}
-                </FormErrorMessage>
+                <FormLabel htmlFor="login-password">Password</FormLabel>
+                <Input
+                  name="password"
+                  id="password-login"
+                  placeholder="password"
+                  type="password"
+                  ref={register}
+                />
               </Box>
             </Stack>
           </FormControl>
@@ -52,7 +53,7 @@ const login: React.FC<loginProps> = ({}) => {
             isLoading={formState.isSubmitting}
             type="submit"
           >
-            LOGIN
+            Login
           </Button>
         </form>
       </Flex>
