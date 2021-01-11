@@ -1,40 +1,90 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
-import { HttpStatusEnum, TokenDataStore } from "../types";
+import { createQueryBuilder, getRepository } from "typeorm";
+import { HttpStatusEnum } from "../types";
 import { Post } from "../entity/Post";
 import { HttpExeption } from "../exception/HttpExeption";
-import jwtDecode from "jwt-decode";
+import { User } from "../entity/User";
 class PostController {
   static createPost = async (
     req: Request,
     res: Response
-  ): Promise<Post | HttpExeption> => {
-    const getToken: any = req.headers["Authorization"];
-    const userData: TokenDataStore = jwtDecode(getToken);
+  ): Promise<Response> => {
     try {
-      let post = getRepository(Post).create({
-        title: req.body.title,
-        body: req.body.body,
-        creatorId: userData.id,
-      });
-      return post;
+      await getRepository(Post)
+        .create({
+          title: req.body.title,
+          body: req.body.body,
+          creatorId: req.user_ID,
+        })
+        .save();
+      return res.json(new HttpExeption(HttpStatusEnum.CREATED, "Post Created"));
     } catch (error) {
-      return new HttpExeption(HttpStatusEnum.SERVER_ERROR, error);
+      return res.json(new HttpExeption(HttpStatusEnum.SERVER_ERROR, error));
     }
   };
 
-  static allPosts = async (
-    req: Request,
-    res: Response
-  ): Promise<Post[] | any> => {
+  static allPosts = async (_, res: Response): Promise<Response> => {
     try {
-      const posts = await getRepository(Post).find();
-      console.log(posts);
-      return posts;
+      console.log(res.locals);
+      const posts: Post[] = await getRepository(Post)
+        .createQueryBuilder("post")
+        .leftJoinAndSelect("post.creator", "user")
+        .getMany();
+      return res.json(
+        new HttpExeption(
+          HttpStatusEnum.SUCCESS,
+          `${posts.length} posts found`,
+          posts
+        )
+      );
     } catch (error) {
-      return res.status(HttpStatusEnum.SERVER_ERROR).json("Server error");
+      return res.json(new HttpExeption(HttpStatusEnum.NOT_FOUND, error));
     }
   };
+
+  static singlePost = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const post = await getRepository(Post)
+      .createQueryBuilder("post")
+      .where({ id: req.params.id })
+      .leftJoinAndSelect("post.creator", "user")
+      .getOne();
+
+    if (post) {
+      return res.json(
+        new HttpExeption(HttpStatusEnum.SUCCESS, `Found Post`, post)
+      );
+    } else
+      return res.json(
+        new HttpExeption(HttpStatusEnum.NOT_FOUND, "Post doesnt not exist")
+      );
+  };
+  static editPost = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    let {title, body} = req.body
+
+    const post = await getRepository(Post)
+    .createQueryBuilder()
+    .update(Post)
+    .set({title: title, body: body})
+    .where("id = :id", { id: 1 })
+    .execute();
+
+    if (post) {
+      return res.json(
+        new HttpExeption(HttpStatusEnum.SUCCESS, `Found Post`, post)
+      );
+    } else
+      return res.json(
+        new HttpExeption(HttpStatusEnum.NOT_FOUND, "Post doesnt not exist")
+      );
+  };
+}
+
 }
 
 export default PostController;

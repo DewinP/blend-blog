@@ -1,16 +1,21 @@
 import { Request, Response, NextFunction } from "express";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { jwtSecret } from "../config";
 import { HttpStatusEnum } from "../types";
-export default async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<any> => {
-  const getToken: any = req.headers["Authorization"];
-  const verfiy = jwt.verify(getToken, jwtSecret);
-  if (verfiy) {
-    next();
-  }
-  res.status(HttpStatusEnum.UNAUTHORIZED).json("Not authorized");
+
+export interface TokenDataStore {
+  id: string;
+  username: string;
+}
+
+export default (req: Request, res: Response, next: NextFunction) => {
+  let token = req.headers.authorization?.split(" ")[1];
+
+  if (!token)
+    return res.status(HttpStatusEnum.UNAUTHORIZED).json("Not authorized");
+
+  let verify = jwt.verify(token, jwtSecret) as TokenDataStore;
+  console.log(verify);
+  req.user_ID = verify.id;
+  next();
 };

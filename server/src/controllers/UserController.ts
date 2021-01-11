@@ -3,7 +3,6 @@ import { IUserInput } from "../types";
 import { getRepository } from "typeorm";
 import { Request, Response } from "express";
 import { User } from "../entity/User";
-import { validateRegister } from "../utils/ValidateRegister";
 
 class UserController {
   static getSingleUser = async (req: Request, res: Response) => {
@@ -24,12 +23,6 @@ class UserController {
       username: username,
       password: password,
     };
-
-    const errors = validateRegister(user);
-    if (errors) {
-      res.status(400).send({ errors });
-      return;
-    }
 
     const hashedPass = await argon2.hash(user.password);
     user.password = hashedPass;

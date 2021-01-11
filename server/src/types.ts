@@ -1,6 +1,3 @@
-import { User } from "./entity/User";
-import { Post } from "./entity/Post";
-
 export enum HttpStatusEnum {
   SUCCESS = 200,
   CREATED = 201,
@@ -18,11 +15,6 @@ export interface IUser {
   email?: string;
   updatedAt?: Date;
   createdAt?: Date;
-}
-
-export interface TokenDataStore {
-  id: string;
-  username: string;
 }
 
 export interface IUserInput {

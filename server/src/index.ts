@@ -10,7 +10,6 @@ import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
 import userRoutes from "./routes/user.routes";
 import passport from "passport";
-import passportMiddleware from "./middleware/passport";
 
 const main = async () => {
   await createConnection(ORMConfig);
@@ -33,7 +32,6 @@ const main = async () => {
     )
     .use(passport.initialize())
     .use(passport.session());
-  passport.use(passportMiddleware);
 
   app.get("/", (_, res) => {
     res.json("INDEX PAGE");
