@@ -23,7 +23,9 @@ export class Post extends BaseEntity {
   @Column()
   creatorId: string;
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, {
+    eager: true,
+  })
   creator: User;
 
   @CreateDateColumn()
