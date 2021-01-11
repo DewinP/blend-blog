@@ -12,9 +12,6 @@ export enum HttpStatusEnum {
 export interface IUser {
   id: string;
   username: string;
-  email?: string;
-  updatedAt?: Date;
-  createdAt?: Date;
 }
 
 export interface IUserInput {
@@ -22,8 +19,8 @@ export interface IUserInput {
   password: string;
   username: string;
 }
-export interface EncodeResult {
-  token: string;
-  expires: number;
-  issued: number;
+export interface IFieldError {
+  field: string;
+  message: string;
+  status: HttpStatusEnum;
 }

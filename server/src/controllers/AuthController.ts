@@ -1,10 +1,20 @@
 import argon2 from "argon2";
 import { Request, Response } from "express";
 import { getRepository, getConnection } from "typeorm";
-import { HttpStatusEnum, IUser, IUserInput } from "../types";
+import { HttpStatusEnum, IFieldError, IUser, IUserInput } from "../types";
 import { User } from "../entity/User";
 import { jwtSecret } from "../config";
 import * as jwt from "jsonwebtoken";
+
+interface IAuthResponse {
+  errors?: IFieldError[];
+  user?: IUserAuth;
+}
+interface IUserAuth {
+  token: string;
+  userID: string;
+  username: string;
+}
 
 class AuthController {
   static createToken = async (
@@ -16,13 +26,11 @@ class AuthController {
     return token;
   };
 
-  static login = async (req: Request, res: Response): Promise<Response> => {
+  static login = async (
+    req: Request,
+    res: Response
+  ): Promise<IAuthResponse> => {
     let { username, password } = req.body;
-    console.log(username, password);
-    if (!(username && password)) {
-      return res.status(HttpStatusEnum.BAD_REQUEST).json("Empty fields");
-    }
-
     let user = await getRepository(User)
       .createQueryBuilder("user")
       .where("user.username = :username", { username: username })
@@ -30,26 +38,37 @@ class AuthController {
       .getOne();
 
     if (!user) {
-      return res.status(HttpStatusEnum.BAD_REQUEST).json("User not found");
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "Username already taken",
+            status: HttpStatusEnum.BAD_REQUEST,
+          },
+        ],
+      };
     }
-    console.log("qopjtpopotj", user);
+
     const valid = await argon2.verify(user.password, password);
     if (!valid) {
-      return res.status(HttpStatusEnum.BAD_REQUEST).send("Incorrect password");
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "Incorrect password. Try again",
+            status: HttpStatusEnum.BAD_REQUEST,
+          },
+        ],
+      };
     }
 
     let userResponse: IUser = {
       id: user.id,
-      email: user.email,
       username: user.username,
     };
     const expiresIn: number = 60 * 60 * 24;
     const token = await AuthController.createToken(userResponse, expiresIn);
-
-    return res.json({
-      token,
-      user: userResponse,
-    });
+    return { user: { token, userID: user.id, username: user.username } };
   };
 
   static register = async (req: Request, res: Response): Promise<Response> => {
@@ -70,7 +89,12 @@ class AuthController {
         .values(userInput)
         .execute();
     } catch (error) {
-      return res.status(HttpStatusEnum.FORBIDDEN).json({ error: error });
+      return res.json({
+        error: {
+          status: HttpStatusEnum.SERVER_ERROR,
+          message: "Internal server error",
+        },
+      });
     }
     return res.status(HttpStatusEnum.SUCCESS_NO_CONTENT).json("User created");
   };

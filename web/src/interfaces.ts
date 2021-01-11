@@ -20,5 +20,5 @@ export interface IPostInput {
 
 export interface ILoginData {
   token: string;
-  user: any;
+  user: IUser;
 }
