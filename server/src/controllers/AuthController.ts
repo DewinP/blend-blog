@@ -3,9 +3,9 @@ import { Request, Response } from "express";
 import { getRepository, getConnection } from "typeorm";
 import { HttpStatusEnum, IUser, IUserInput } from "../types";
 import { User } from "../entity/User";
-import { HttpExeption } from "../exception/HttpExeption";
 import { jwtSecret } from "../config";
 import * as jwt from "jsonwebtoken";
+
 class AuthController {
   static createToken = async (
     user: IUser,
@@ -17,27 +17,25 @@ class AuthController {
   };
 
   static login = async (req: Request, res: Response): Promise<Response> => {
-    let { usernameOrEmail, password } = req.body;
-    if (!(usernameOrEmail && password)) {
-      return res.json(
-        new HttpExeption(HttpStatusEnum.BAD_REQUEST, "Empty fields")
-      );
+    let { username, password } = req.body;
+    console.log(username, password);
+    if (!(username && password)) {
+      return res.status(HttpStatusEnum.BAD_REQUEST).json("Empty fields");
     }
 
-    let user = await getRepository(User).findOne({
-      where: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
-    });
+    let user = await getRepository(User)
+      .createQueryBuilder("user")
+      .where("user.username = :username", { username: username })
+      .addSelect("user.password")
+      .getOne();
+
     if (!user) {
-      return res.json(
-        new HttpExeption(HttpStatusEnum.BAD_REQUEST, "User not found")
-      );
+      return res.status(HttpStatusEnum.BAD_REQUEST).json("User not found");
     }
-
+    console.log("qopjtpopotj", user);
     const valid = await argon2.verify(user.password, password);
     if (!valid) {
-      return res.json(
-        new HttpExeption(HttpStatusEnum.BAD_REQUEST, "Incorrect password")
-      );
+      return res.status(HttpStatusEnum.BAD_REQUEST).send("Incorrect password");
     }
 
     let userResponse: IUser = {
@@ -48,12 +46,10 @@ class AuthController {
     const expiresIn: number = 60 * 60 * 24;
     const token = await AuthController.createToken(userResponse, expiresIn);
 
-    return res.json(
-      new HttpExeption(HttpStatusEnum.CREATED, "User Authorized", {
-        token,
-        user: userResponse,
-      })
-    );
+    return res.json({
+      token,
+      user: userResponse,
+    });
   };
 
   static register = async (req: Request, res: Response): Promise<Response> => {
@@ -73,12 +69,10 @@ class AuthController {
         .into(User)
         .values(userInput)
         .execute();
-    } catch (err) {
-      return res.json(new HttpExeption(HttpStatusEnum.FORBIDDEN, err));
+    } catch (error) {
+      return res.status(HttpStatusEnum.FORBIDDEN).json({ error: error });
     }
-    return res.json(
-      new HttpExeption(HttpStatusEnum.SUCCESS_NO_CONTENT, "Created User")
-    );
+    return res.status(HttpStatusEnum.SUCCESS_NO_CONTENT).json("User created");
   };
 }
 
