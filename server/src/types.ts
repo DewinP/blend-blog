@@ -19,8 +19,19 @@ export interface IUserInput {
   password: string;
   username: string;
 }
+
+export interface IPostInput {
+  title: string;
+  body: string;
+}
+
 export interface IFieldError {
   field: string;
   message: string;
-  status: HttpStatusEnum;
+}
+
+export interface ILoginRegisterInput {
+  username: string;
+  email: string;
+  password: string;
 }

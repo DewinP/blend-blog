@@ -5,6 +5,8 @@ import { HttpStatusEnum, IFieldError, IUser, IUserInput } from "../types";
 import { User } from "../entity/User";
 import { jwtSecret } from "../config";
 import * as jwt from "jsonwebtoken";
+import { validateRegister } from "../utils/validateRegister";
+import { resolve } from "path";
 
 interface IAuthResponse {
   errors?: IFieldError[];
@@ -29,37 +31,36 @@ class AuthController {
   static login = async (
     req: Request,
     res: Response
-  ): Promise<IAuthResponse> => {
+  ): Promise<Response<IAuthResponse>> => {
     let { username, password } = req.body;
     let user = await getRepository(User)
       .createQueryBuilder("user")
       .where("user.username = :username", { username: username })
       .addSelect("user.password")
       .getOne();
-
+    console.log(user);
     if (!user) {
-      return {
+      return res.json({
         errors: [
           {
             field: "username",
-            message: "Username already taken",
+            message: "Username doesn't exist",
             status: HttpStatusEnum.BAD_REQUEST,
           },
         ],
-      };
+      });
     }
 
     const valid = await argon2.verify(user.password, password);
     if (!valid) {
-      return {
+      return res.json({
         errors: [
           {
             field: "password",
             message: "Incorrect password. Try again",
-            status: HttpStatusEnum.BAD_REQUEST,
           },
         ],
-      };
+      });
     }
 
     let userResponse: IUser = {
@@ -68,16 +69,23 @@ class AuthController {
     };
     const expiresIn: number = 60 * 60 * 24;
     const token = await AuthController.createToken(userResponse, expiresIn);
-    return { user: { token, userID: user.id, username: user.username } };
+    return res.json({
+      user: { token, userID: user.id, username: user.username },
+    });
   };
 
-  static register = async (req: Request, res: Response): Promise<Response> => {
+  static register = async (
+    req: Request,
+    res: Response
+  ): Promise<Response<IFieldError[] | HttpStatusEnum>> => {
     let { email, password, username } = req.body;
     let userInput: IUserInput = {
       email: email,
       username: username,
       password: password,
     };
+    const errors = validateRegister(userInput);
+    if (errors) return res.json({ errors });
 
     const hashedPass = await argon2.hash(userInput.password);
     userInput.password = hashedPass;
@@ -89,14 +97,29 @@ class AuthController {
         .values(userInput)
         .execute();
     } catch (error) {
-      return res.json({
-        error: {
-          status: HttpStatusEnum.SERVER_ERROR,
-          message: "Internal server error",
-        },
-      });
+      if (error.code === "23505") {
+        if (error.detail.includes("email")) {
+          return res.json({
+            errors: [
+              {
+                field: "email",
+                message: "email is already being used",
+              },
+            ],
+          });
+        } else {
+          return res.json({
+            errors: [
+              {
+                field: "username",
+                message: "username already taken",
+              },
+            ],
+          });
+        }
+      }
     }
-    return res.status(HttpStatusEnum.SUCCESS_NO_CONTENT).json("User created");
+    return res.sendStatus(HttpStatusEnum.SUCCESS);
   };
 }
 

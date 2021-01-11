@@ -1,65 +1,73 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
-import { HttpStatusEnum } from "../types";
+import { HttpStatusEnum, IFieldError } from "../types";
 import { Post } from "../entity/Post";
+import { validatePost } from "../utils/validatePost";
+
 class PostController {
   static createPost = async (
     req: Request,
     res: Response
-  ): Promise<Response> => {
+  ): Promise<Response<Post | IFieldError[]>> => {
     let { title, body } = req.body;
-    if (!(body && title)) {
-      return res.status(HttpStatusEnum.BAD_REQUEST).json("Empty fields");
-    }
+    let errors = validatePost(req.body);
+    if (errors) return res.json({ errors });
     try {
       let post = await getRepository(Post)
         .create({
-          title: req.body.title,
-          body: req.body.body,
+          title: title,
+          body: body,
           creatorId: req.user_ID,
         })
         .save();
-      return res.status(HttpStatusEnum.CREATED).json({ post: post });
+      return res.json(post);
     } catch (error) {
-      return res.status(HttpStatusEnum.SERVER_ERROR).json({ error: error });
+      if (error.code === "23505") {
+        return res.json({
+          errors: [
+            {
+              field: "title",
+              message: "title is already taken",
+            },
+          ],
+        });
+      }
+      return res.json(HttpStatusEnum.SERVER_ERROR);
     }
   };
-
-  static allPosts = async (_, res: Response): Promise<Response> => {
+  static allPosts = async (
+    _,
+    res: Response
+  ): Promise<Response<Post[] | undefined>> => {
     try {
-      console.log(res.locals);
       const posts: Post[] = await getRepository(Post).find();
       return res.json({ posts: posts });
     } catch (error) {
-      return res.status(HttpStatusEnum.NOT_FOUND).json({ error: error });
+      return res.json(HttpStatusEnum.SERVER_ERROR);
     }
   };
 
   static singlePost = async (
     req: Request,
     res: Response
-  ): Promise<Response> => {
+  ): Promise<Response<Post>> => {
     const post = await getRepository(Post).findOne({
       where: {
         id: req.params.id,
       },
     });
-
     if (post) {
-      return res.json({ post: post });
-    } else
-      return res.status(HttpStatusEnum.NOT_FOUND).json("Post doesnt not exist");
+      return res.json({ post });
+    } else return res.json(HttpStatusEnum.NOT_FOUND);
   };
 
   static updatePost = async (
     req: Request,
     res: Response
-  ): Promise<Response> => {
+  ): Promise<Response<IFieldError | Post>> => {
     let { title, body } = req.body;
-    if (!(title && body)) {
-      return res.status(HttpStatusEnum.BAD_REQUEST).json("Empty fields");
-    }
-
+    let errors = validatePost(req.body);
+    if (errors) return res.json({ errors: errors });
     const result = await getRepository(Post)
       .createQueryBuilder()
       .update(Post)
@@ -73,22 +81,22 @@ class PostController {
     let post: Post = result.raw[0];
     if (post) {
       return res.json({ post: post });
-    } else return res.status(HttpStatusEnum.UNAUTHORIZED).json("Unathorized");
+    } else return res.json(HttpStatusEnum.UNAUTHORIZED);
   };
 
   static deletePost = async (
     req: Request,
     res: Response
-  ): Promise<Response> => {
+  ): Promise<Response<HttpStatusEnum>> => {
     const post = await getRepository(Post).findOne(req.params.id);
     if (!post) {
-      res.status(HttpStatusEnum.NOT_FOUND).json("Post not found");
+      res.json(HttpStatusEnum.NOT_FOUND);
     } else if (post.creatorId !== req.user_ID) {
-      res.status(HttpStatusEnum.UNAUTHORIZED).json("Post not found");
+      res.json(HttpStatusEnum.UNAUTHORIZED);
     }
     await Post.delete(req.params.id);
 
-    return res.json("Post deleted successfuly");
+    return res.json(HttpStatusEnum.SUCCESS);
   };
 }
 

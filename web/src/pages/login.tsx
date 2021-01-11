@@ -13,17 +13,14 @@ import { useMutation } from "react-query";
 import { UserFormData } from "../../types";
 import { Login } from "../api/authApi";
 import { Layout } from "../components/Layout";
-import { useRouter } from "next/router";
-import { IUser } from "../interfaces";
 interface loginProps {}
 
 const login: React.FC<loginProps> = ({}) => {
   const { register, handleSubmit, formState } = useForm<UserFormData>();
-  const router = useRouter();
   let { mutate: loginUser } = useMutation(Login);
   const onSubmit = handleSubmit(async (data: UserFormData) => {
     try {
-      let data = loginUser(data);
+      loginUser(data);
     } catch (err) {
       console.error(err);
     }

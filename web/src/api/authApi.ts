@@ -1,7 +1,7 @@
 import axios from "axios";
 import { SERVER } from "../../constants";
 import { UserFormData } from "../../types";
-import { ILoginData, IUser } from "../interfaces";
+import { ILoginData } from "../interfaces";
 export const Signup = async (FormData: UserFormData) => {
   try {
     return await axios.post(`${SERVER}/auth/register`, FormData);

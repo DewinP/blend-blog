@@ -17,7 +17,7 @@ class UserController {
     if (user) {
       return res.json({ user: user });
     } else {
-      return res.status(HttpStatusEnum.NOT_FOUND).json("User does't exist");
+      return res.json(HttpStatusEnum.NOT_FOUND);
     }
   };
 }
