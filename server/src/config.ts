@@ -11,5 +11,5 @@ export const ORMConfig = {
   synchronize: true,
   entities: [Post, User],
 } as ConnectionOptions;
-
+export const PORT = 4000;
 export const jwtSecret = "TokenPasswordSecret";
