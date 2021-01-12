@@ -3,11 +3,13 @@ import NextLink from "next/link";
 import React from "react";
 import { AuthMenu } from "./AuthMenu";
 import { NotAuthMenu } from "./NotAuthMenu";
-
+import { UserContext } from "../contexts/UserContext";
+import { IContextType } from "../interfaces";
 interface NavbarProps {}
 
 export const Navbar: React.FC<NavbarProps> = ({}) => {
-  let user = false;
+  const { user } = React.useContext(UserContext) as IContextType;
+  let userInfo = user.user;
   return (
     <Flex
       h="50px"
@@ -29,7 +31,9 @@ export const Navbar: React.FC<NavbarProps> = ({}) => {
             <Heading cursor="pointer">Blend-Blog</Heading>
           </NextLink>
         </Flex>
-        <Flex align="center">{user ? <AuthMenu /> : <NotAuthMenu />}</Flex>
+        <Flex align="center">
+          {!userInfo ? <NotAuthMenu /> : <AuthMenu user={userInfo.username} />}
+        </Flex>
       </Flex>
     </Flex>
   );

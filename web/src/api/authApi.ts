@@ -1,18 +1,30 @@
 import axios from "axios";
 import { SERVER } from "../../constants";
-import { UserFormData } from "../../types";
-import { ILoginData } from "../interfaces";
+import { IAuthUser, UserFormData } from "../interfaces";
+
 export const Signup = async (FormData: UserFormData) => {
-  try {
-    return await axios.post(`${SERVER}/auth/register`, FormData);
-  } catch (error) {
-    console.log(error);
-  }
+  let { data } = await axios.post(`${SERVER}/auth/register`, FormData);
+  return data;
 };
 
-export const Login = async (FormData: UserFormData): Promise<string | any> => {
-  const data = await axios.post(`${SERVER}/auth/login`, FormData);
-  let userData: ILoginData = data.data;
-  localStorage.setItem("TOKEN_BLEND_BLOG", userData.token);
+export const Login = async (FormData: UserFormData): Promise<IAuthUser> => {
+  const { data } = await axios.post<IAuthUser>(
+    `${SERVER}/auth/login`,
+    FormData
+  );
+  if (data.token) {
+    localStorage.setItem("TOKEN_BLEND_BLOG", `Bearer ${data.token}`);
+  }
+  return data;
+};
+
+export const userAuth = async (): Promise<any> => {
+  let token = localStorage.getItem("TOKEN_BLEND_BLOG");
+  if (!token) return Promise.resolve(null);
+  const { data } = await axios.get(`${SERVER}/auth/`, {
+    headers: {
+      "x-access-token": localStorage.getItem("TOKEN_BLEND_BLOG"),
+    },
+  });
   return data;
 };

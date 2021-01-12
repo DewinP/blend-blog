@@ -1,72 +1,67 @@
-import { Input } from "@chakra-ui/input";
-import {
-  FormControl,
-  FormLabel,
-  Button,
-  Stack,
-  Box,
-  Flex,
-} from "@chakra-ui/react";
+import { Button, Stack, Box, Flex } from "@chakra-ui/react";
 import React from "react";
-import { useForm } from "react-hook-form";
+
 import { Signup } from "../api/authApi";
 import { Layout } from "../components/Layout";
 import { useMutation } from "react-query";
 import { useRouter } from "next/router";
-import { UserFormData } from "../../types";
+import { Form, Formik } from "formik";
+import { InputField } from "../components/InputField";
+import { toErrorMap } from "../utils/toErrorMap";
 
 type FormData = {
   email: string;
   password: string;
+  username: string;
 };
 
-interface loginProps {}
-const signup: React.FC<loginProps> = ({}) => {
-  const { register, handleSubmit, formState } = useForm<FormData>();
-  const { mutate: signupUser } = useMutation(Signup);
+const signup: React.FC<{}> = ({}) => {
+  const { mutateAsync: registerUser } = useMutation(Signup);
   const router = useRouter();
-  const onSubmit = handleSubmit(async (data: UserFormData) => {
-    signupUser(data, {
-      onSuccess: () => {
-        router.push("/login");
-      },
-    });
-  });
   return (
     <Layout>
       <Flex justify="center">
-        <form onSubmit={onSubmit}>
-          <FormControl>
-            <Stack spacing={3} w="500px">
-              <Box>
-                <FormLabel htmlFor="userame">Username</FormLabel>
-                <Input name="username" placeholder="username" ref={register} />
-              </Box>
-              <Box>
-                <FormLabel htmlFor="email">Email</FormLabel>
-                <Input name="email" placeholder="email" ref={register} />
-              </Box>
-              <Box>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <Input
-                  name="password"
-                  id="password"
-                  placeholder="password"
-                  type="password"
-                  ref={register}
+        <Formik
+          initialValues={{ username: "", email: "", password: "" }}
+          onSubmit={async (values: FormData, { setErrors }) => {
+            const { errors } = await registerUser(values);
+            if (errors) {
+              setErrors(toErrorMap(errors));
+            } else {
+              router.push("/login");
+            }
+          }}
+        >
+          {({ isSubmitting }) => (
+            <Form>
+              <Stack spacing={2}>
+                <InputField
+                  name="username"
+                  placeholder="username"
+                  label="Username"
                 />
-              </Box>
-            </Stack>
-          </FormControl>
-          <Button
-            mt={4}
-            colorScheme="teal"
-            isLoading={formState.isSubmitting}
-            type="submit"
-          >
-            SIGNUP
-          </Button>
-        </form>
+                <InputField name="email" placeholder="email" label="Email" />
+                <Box>
+                  <InputField
+                    name="password"
+                    placeholder="password"
+                    label="Password"
+                    type="password"
+                  />
+                </Box>
+              </Stack>
+              <Button
+                mt="20px"
+                w="100%"
+                type="submit"
+                isLoading={isSubmitting}
+                colorScheme="teal"
+              >
+                SIGNUP
+              </Button>
+            </Form>
+          )}
+        </Formik>
       </Flex>
     </Layout>
   );

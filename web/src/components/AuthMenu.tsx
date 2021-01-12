@@ -9,13 +9,15 @@ import {
 import React from "react";
 import { FiChevronDown, FiLogOut } from "react-icons/fi";
 
-interface AuthMenuProps {}
+interface AuthMenuProps {
+  user: string;
+}
 
-export const AuthMenu: React.FC<AuthMenuProps> = ({}) => {
+export const AuthMenu: React.FC<AuthMenuProps> = ({ user }) => {
   return (
     <Menu>
       <MenuButton as={Button} variant="link" rightIcon={<FiChevronDown />}>
-        user.username
+        {user}
       </MenuButton>
       <MenuList>
         <MenuItem minH="40px" fontWeight="bold">

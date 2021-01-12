@@ -23,7 +23,6 @@ export const PostForm: React.FC<PostProps> = ({
 }) => {
   const { register, handleSubmit } = useForm({ defaultValues });
   const onSubmit = handleSubmit((data) => {
-    console.log("ljtqjtqjt");
     onFormSubmit(data);
   });
   return (

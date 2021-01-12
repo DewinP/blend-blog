@@ -3,14 +3,17 @@ import theme from "../theme";
 import { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
 import React from "react";
+import UserContextProvider from "../contexts/UserContext";
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ChakraProvider theme={theme}>
-        <Component {...pageProps} />
-      </ChakraProvider>
+      <UserContextProvider>
+        <ChakraProvider theme={theme}>
+          <Component {...pageProps} />
+        </ChakraProvider>
+      </UserContextProvider>
     </QueryClientProvider>
   );
 }

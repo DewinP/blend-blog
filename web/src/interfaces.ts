@@ -8,6 +8,14 @@ export interface IPost {
   creator: IUser;
 }
 
+export interface UserFormData {
+  username: string;
+  password: string;
+}
+
+export interface IPostFav {
+  favorites: string[];
+}
 export interface IUser {
   id: string;
   username: string;
@@ -18,7 +26,24 @@ export interface IPostInput {
   body: string;
 }
 
-export interface ILoginData {
-  token: string;
-  user: IUser;
+export interface IErrorField {
+  field: string;
+  message: string;
+}
+
+export interface IAuthUser {
+  token?: string;
+  data?: IUserContext;
+  errors?: IErrorField[];
+}
+
+export interface IUserContext {
+  user?: IUser;
+  posts?: IPost;
+  favorites?: IPostFav;
+}
+
+export interface IContextType {
+  setUser: (user: IUserContext) => void;
+  user: IUserContext;
 }
