@@ -1,7 +1,13 @@
-import { IFieldError, IUserInput } from "../types";
+import { IFieldError } from "../types";
 
-export const validateRegister = (options: IUserInput): IFieldError[] | null => {
-  if (!options.email.includes("@")) {
+interface fieldInput {
+  username: string;
+  email?: string;
+  password: string;
+}
+
+export const validateInput = (options: fieldInput): IFieldError[] | null => {
+  if (options.email && !options.email.includes("@")) {
     return [
       {
         field: "email",

@@ -1,12 +1,11 @@
 import argon2 from "argon2";
 import { Request, Response } from "express";
 import { getRepository, getConnection } from "typeorm";
-import { HttpStatusEnum, IFieldError, IUser, IUserInput } from "../types";
+import { IFieldError, IUser, IUserInput } from "../types";
 import { User } from "../entity/User";
 import { jwtSecret } from "../config";
 import * as jwt from "jsonwebtoken";
-import { validateRegister } from "../utils/validateRegister";
-import { resolve } from "path";
+import { validateInput } from "../utils/validateInput";
 
 interface IAuthResponse {
   errors?: IFieldError[];
@@ -19,6 +18,20 @@ interface IUserAuth {
 }
 
 class AuthController {
+  static userAuthenticated = async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    const user = await getRepository(User)
+      .createQueryBuilder("user")
+      .where({ id: req.user_ID })
+      .getOne();
+
+    if (user) {
+      return res.json({ user: user.username });
+    }
+    return res.json(null);
+  };
   static createToken = async (
     user: IUser,
     expiresIn: number
@@ -32,20 +45,24 @@ class AuthController {
     req: Request,
     res: Response
   ): Promise<Response<IAuthResponse>> => {
+    let errors = validateInput(req.body);
+    if (errors) {
+      return res.json({ errors });
+    }
+
     let { username, password } = req.body;
     let user = await getRepository(User)
       .createQueryBuilder("user")
       .where("user.username = :username", { username: username })
       .addSelect("user.password")
       .getOne();
-    console.log(user);
+
     if (!user) {
       return res.json({
         errors: [
           {
             field: "username",
             message: "Username doesn't exist",
-            status: HttpStatusEnum.BAD_REQUEST,
           },
         ],
       });
@@ -77,14 +94,14 @@ class AuthController {
   static register = async (
     req: Request,
     res: Response
-  ): Promise<Response<IFieldError[] | HttpStatusEnum>> => {
+  ): Promise<Response<IFieldError[]>> => {
     let { email, password, username } = req.body;
     let userInput: IUserInput = {
       email: email,
       username: username,
       password: password,
     };
-    const errors = validateRegister(userInput);
+    const errors = validateInput(userInput);
     if (errors) return res.json({ errors });
 
     const hashedPass = await argon2.hash(userInput.password);
@@ -119,7 +136,7 @@ class AuthController {
         }
       }
     }
-    return res.sendStatus(HttpStatusEnum.SUCCESS);
+    return res.sendStatus(200);
   };
 }
 
