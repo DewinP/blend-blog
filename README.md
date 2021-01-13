@@ -1,5 +1,7 @@
 # Onramp Fullstack Take Home Project
 
+![Blend-blog Demo](https://media.giphy.com/media/VvErKryNAQDjlTpVgW/giphy.gif)
+
 ## Overview 🤖
 
 A crud fullstack blogpost website.
