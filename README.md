@@ -56,7 +56,7 @@ To get the run front end running
 
 4. `yarn dev` to start the local server and run the app in the development mode.
 
-5. Open [http://localhost:3000]to view it in the browser.
+5. Open [http://localhost:3000](http://localhost:3000)to view it in the browser.
 
 To get back end running
 
@@ -65,3 +65,5 @@ To get back end running
 2. `yarn` to install all required dependencies
 
 3. `yarn dev` to start the local server and run the app in the development mode.
+
+4. Open [http://localhost:3000](http://localhost:4000)to view it in the browser.
