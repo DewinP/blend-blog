@@ -1,3 +1,5 @@
+import { Post } from "./entity/Post";
+
 export enum HttpStatusEnum {
   SUCCESS = 200,
   CREATED = 201,
@@ -12,6 +14,9 @@ export enum HttpStatusEnum {
 export interface IUser {
   id: string;
   username: string;
+  email: string;
+  createdAt: Date;
+  posts: Post[];
 }
 
 export interface IUserInput {
@@ -34,4 +39,9 @@ export interface ILoginRegisterInput {
   username: string;
   email: string;
   password: string;
+}
+
+export interface IPostResponse {
+  post?: Post;
+  errors?: IFieldError[];
 }

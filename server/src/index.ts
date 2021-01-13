@@ -8,7 +8,6 @@ import bodyParser from "body-parser";
 import { ORMConfig, PORT } from "./config";
 import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
-import userRoutes from "./routes/user.routes";
 
 const main = async () => {
   await createConnection(ORMConfig);
@@ -32,7 +31,6 @@ const main = async () => {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/posts", postRoutes);
-  app.use("/api/users", userRoutes);
 
   app.listen(PORT, () => {
     console.log(`server started in https://localhost:${PORT}`);

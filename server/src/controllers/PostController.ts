@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { getRepository } from "typeorm";
-import { HttpStatusEnum, IFieldError } from "../types";
+import { HttpStatusEnum, IFieldError, IPostResponse } from "../types";
 import { Post } from "../entity/Post";
 import { validatePost } from "../utils/validatePost";
 
@@ -8,19 +8,19 @@ class PostController {
   static createPost = async (
     req: Request,
     res: Response
-  ): Promise<Response<Post | IFieldError[]>> => {
+  ): Promise<Response<IPostResponse>> => {
     let { title, body } = req.body;
     let errors = validatePost(req.body);
     if (errors) return res.json({ errors });
+    let post;
     try {
-      let post = await getRepository(Post)
+      post = await getRepository(Post)
         .create({
           title: title,
           body: body,
           creatorId: req.user_ID,
         })
         .save();
-      return res.json(post);
     } catch (error) {
       if (error.code === "23505") {
         return res.json({
@@ -32,8 +32,16 @@ class PostController {
           ],
         });
       }
-      return res.json(HttpStatusEnum.SERVER_ERROR);
+      return res.json({
+        errors: [
+          {
+            field: "title",
+            message: "Server error",
+          },
+        ],
+      });
     }
+    return res.json({ post });
   };
   static allPosts = async (
     _,
@@ -51,9 +59,10 @@ class PostController {
     req: Request,
     res: Response
   ): Promise<Response<Post>> => {
+    let id = req.params.id;
     const post = await getRepository(Post).findOne({
       where: {
-        id: req.params.id,
+        id,
       },
     });
     if (post) {
@@ -89,14 +98,11 @@ class PostController {
     res: Response
   ): Promise<Response<HttpStatusEnum>> => {
     const post = await getRepository(Post).findOne(req.params.id);
-    if (!post) {
-      res.json(HttpStatusEnum.NOT_FOUND);
-    } else if (post.creatorId !== req.user_ID) {
-      res.json(HttpStatusEnum.UNAUTHORIZED);
+    if (!post || post.creatorId !== req.user_ID) {
+      res.json({ status: false });
     }
     await Post.delete(req.params.id);
-
-    return res.json(HttpStatusEnum.SUCCESS);
+    return res.json({ status: true });
   };
 }
 

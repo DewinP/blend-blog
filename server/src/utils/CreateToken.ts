@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import { jwtSecret } from "../config";
-import { IUser } from "../types";
 
-const createToken = (user: IUser) => {
+const createToken = (userID: string) => {
   try {
-    jwt.sign({ user }, jwtSecret);
+    jwt.sign(userID, jwtSecret);
   } catch (error) {
     return { error: error };
   }

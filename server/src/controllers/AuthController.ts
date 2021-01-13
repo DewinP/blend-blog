@@ -7,14 +7,10 @@ import { jwtSecret } from "../config";
 import * as jwt from "jsonwebtoken";
 import { validateInput } from "../utils/validateInput";
 
-interface IAuthResponse {
+interface ILoginResponse {
+  token?: string;
+  user?: IUser;
   errors?: IFieldError[];
-  user?: IUserAuth;
-}
-interface IUserAuth {
-  token: string;
-  userID: string;
-  username: string;
 }
 
 class AuthController {
@@ -24,27 +20,26 @@ class AuthController {
   ): Promise<Response> => {
     const user = await getRepository(User)
       .createQueryBuilder("user")
-      .where({ id: req.user_ID })
+      .where("user.id = :id", { id: req.user_ID })
+      .leftJoinAndSelect("user.posts", "posts")
       .getOne();
 
     if (user) {
-      return res.json({ user: user.username });
+      return res.json({ user: user });
     }
     return res.json(null);
   };
-  static createToken = async (
-    user: IUser,
-    expiresIn: number
-  ): Promise<string> => {
+
+  static createToken = async (userID: string): Promise<string> => {
     const secret: string = jwtSecret;
-    const token = jwt.sign(user, secret, { expiresIn });
+    const token = jwt.sign(userID, secret);
     return token;
   };
 
   static login = async (
     req: Request,
     res: Response
-  ): Promise<Response<IAuthResponse>> => {
+  ): Promise<Response<ILoginResponse>> => {
     let errors = validateInput(req.body);
     if (errors) {
       return res.json({ errors });
@@ -54,6 +49,7 @@ class AuthController {
     let user = await getRepository(User)
       .createQueryBuilder("user")
       .where("user.username = :username", { username: username })
+      .leftJoinAndSelect("user.posts", "posts")
       .addSelect("user.password")
       .getOne();
 
@@ -67,7 +63,6 @@ class AuthController {
         ],
       });
     }
-
     const valid = await argon2.verify(user.password, password);
     if (!valid) {
       return res.json({
@@ -79,15 +74,17 @@ class AuthController {
         ],
       });
     }
-
-    let userResponse: IUser = {
+    const token = await AuthController.createToken(user.id);
+    let formattedUser: IUser = {
       id: user.id,
       username: user.username,
+      email: user.username,
+      createdAt: user.createdAt,
+      posts: user.posts,
     };
-    const expiresIn: number = 60 * 60 * 24;
-    const token = await AuthController.createToken(userResponse, expiresIn);
     return res.json({
-      user: { token, userID: user.id, username: user.username },
+      token,
+      user: formattedUser,
     });
   };
 

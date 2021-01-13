@@ -1,16 +1,14 @@
 import { IFieldError, IPostInput } from "../types";
 
 export const validatePost = (options: IPostInput): IFieldError[] | null => {
-  if (options.body === " " || options.title === " ") {
+  if (options.body === "" && options.title === "") {
     if (options.body)
       return [
         {
           field: "title",
           message: "Title mus not be empty",
         },
-      ];
-    else
-      return [
+
         {
           field: "body",
           message: "Body must not be empty",
