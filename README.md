@@ -66,4 +66,4 @@ To get back end running
 
 3. `yarn dev` to start the local server and run the app in the development mode.
 
-4. Open [http://localhost:3000](http://localhost:4000)to view it in the browser.
+4. you will be given the URL in which your server is running.
