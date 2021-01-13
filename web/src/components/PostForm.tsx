@@ -1,58 +1,81 @@
-import {
-  Stack,
-  Input,
-  Textarea,
-  Divider,
-  Button,
-  Flex,
-} from "@chakra-ui/react";
+import { Stack, Button, Flex, Box } from "@chakra-ui/react";
+import { Formik, Form } from "formik";
 import React from "react";
-import { useForm } from "react-hook-form";
-import { IPostInput } from "../interfaces";
+import { UseMutateAsyncFunction } from "react-query";
+import { IPost, IPostInput, IPostResponse } from "../interfaces";
+import { toErrorMap } from "../utils/toErrorMap";
+import { InputField } from "./InputField";
+import { useRouter } from "next/router";
 
 interface PostProps {
-  defaultValues?: IPostInput;
-  onFormSubmit: (data: IPostInput) => Promise<void>;
-  isLoading: boolean;
+  post?: IPost;
+  postMutation: UseMutateAsyncFunction<
+    IPostResponse,
+    unknown,
+    IPostInput,
+    unknown
+  >;
 }
 
-export const PostForm: React.FC<PostProps> = ({
-  defaultValues,
-  onFormSubmit,
-  isLoading,
-}) => {
-  const { register, handleSubmit } = useForm({ defaultValues });
-  const onSubmit = handleSubmit((data) => {
-    onFormSubmit(data);
-  });
+export const PostForm: React.FC<PostProps> = ({ post, postMutation }) => {
+  let router = useRouter();
+  let defaulTitle = "";
+  let defaultBody = "";
+  if (post) {
+    defaulTitle = post.title;
+    defaultBody = post.body;
+  }
   return (
-    <Stack p="10px" bgColor="grenish" borderRadius="8px" spacing="1">
-      <Input
-        ref={register}
-        id="title"
-        name="title"
-        fontWeight="bold"
-        placeholder="Post title..."
-        bgColor="white"
-      />
-      <Textarea
-        id="body"
-        name="body"
-        bgColor="white"
-        w="100p%"
-        placeholder="Write a post..."
-      />
-      <Divider />
-      <Flex justify="flex-end">
-        <Button
-          h="35px"
-          mr="30px"
-          isLoading={isLoading ? true : false}
-          onClick={onSubmit}
-        >
-          Submit
-        </Button>
-      </Flex>
+    <Stack justify="center" align="center">
+      <Formik
+        initialValues={{ title: defaulTitle, body: defaultBody }}
+        onSubmit={async (values, { setErrors }) => {
+          const data = await postMutation({
+            title: values.title,
+            body: values.body,
+            id: post?.id,
+          });
+          console.log(data);
+          if (data.post) {
+            router.push(`/posts/${data.post.id}`);
+          } else if (data.errors) {
+            setErrors(toErrorMap(data.errors));
+          }
+        }}
+      >
+        {({ isSubmitting }) => (
+          <Form>
+            <Stack spacing={2}>
+              <Flex justify="flex-end" w="100%">
+                <Button
+                  bgColor="tomato"
+                  color="white"
+                  size="sm"
+                  onClick={() => router.back()}
+                >
+                  Cancel
+                </Button>
+              </Flex>
+              <InputField
+                name="title"
+                placeholder="Post title..."
+                label={post ? "Update post" : "Create post"}
+              />
+              <Box mt={4}>
+                <InputField name="body" placeholder="body" textarea />
+              </Box>
+              <Button
+                mt="20px"
+                type="submit"
+                isLoading={isSubmitting}
+                colorScheme="teal"
+              >
+                {post ? "UPDATE POST" : " CREATE POST"}
+              </Button>
+            </Stack>
+          </Form>
+        )}
+      </Formik>
     </Stack>
   );
 };

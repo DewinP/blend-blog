@@ -3,7 +3,8 @@ import theme from "../theme";
 import { AppProps } from "next/app";
 import { QueryClient, QueryClientProvider } from "react-query";
 import React from "react";
-import UserContextProvider from "../contexts/UserContext";
+import UserContextProvider from "../context";
+
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }: AppProps) {

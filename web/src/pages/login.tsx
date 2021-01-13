@@ -8,25 +8,26 @@ import { Layout } from "../components/Layout";
 import { useRouter } from "next/router";
 import { InputField } from "../components/InputField";
 import { toErrorMap } from "../utils/toErrorMap";
-import { UserContext } from "../contexts/UserContext";
+import { UserContext } from "../context";
 import { IContextType } from "../interfaces";
+
 interface loginProps {}
 
 const login: React.FC<loginProps> = ({}) => {
   let { mutateAsync: loginUser } = useMutation(Login);
-  let router = useRouter();
   const { setUser } = React.useContext(UserContext) as IContextType;
+  let router = useRouter();
   return (
     <Layout>
       <Flex justify="center">
         <Formik
           initialValues={{ username: "", password: "" }}
           onSubmit={async (values, { setErrors }) => {
-            const { data, errors } = await loginUser(values);
-            if (errors) {
-              setErrors(toErrorMap(errors));
-            } else if (data) {
-              setUser(data);
+            const data = await loginUser(values);
+            if (data.errors) {
+              setErrors(toErrorMap(data.errors));
+            } else if (data.user) {
+              setUser(data.user);
               router.push("/");
             }
           }}

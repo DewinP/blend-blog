@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import {
   Flex,
@@ -12,14 +11,16 @@ import { useQuery } from "react-query";
 import { FiSearch } from "react-icons/fi";
 import { fetchAllPosts } from "../api/postApi";
 import { PostPreview } from "../components/PostPreview";
+import { meQuery } from "../api/authApi";
 
 const Index = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-  const { data, isLoading } = useQuery("posts", fetchAllPosts);
-  if (isLoading) {
+  const { data: allPosts, isLoading: postsIsLoading } = useQuery(
+    "posts",
+    fetchAllPosts
+  );
+  const { data: user } = useQuery("me", meQuery);
+
+  if (postsIsLoading) {
     <Layout>
       <Flex justify="center" align="center" height="100vh">
         <Spinner
@@ -41,17 +42,13 @@ const Index = () => {
         wrap="wrap"
       >
         <InputGroup size="sm" maxW="400px" m={{ base: 0, sm: 2 }}>
-          <Input
-            placeholder={`Search posts`}
-            value={searchTerm}
-            onChange={handleChange}
-          />
+          <Input placeholder={`Search posts`} />
           <InputRightElement p={0} children={<FiSearch />} />
         </InputGroup>
       </Flex>
       <Stack>
-        {data?.map((p) => {
-          return <PostPreview key={p.id} p={p} />;
+        {allPosts?.map((p) => {
+          return <PostPreview key={p.id} userPosts={user?.posts} p={p} />;
         })}
       </Stack>
     </Layout>

@@ -21,14 +21,14 @@ export const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const [field, { error }] = useField(props);
   return (
-    <FormControl isInvalid={!!error} width={300}>
+    <FormControl isInvalid={!!error} width={700}>
       <FormLabel htmlFor={field.name}>{props.label}</FormLabel>
       {textarea ? (
         <Textarea
           {...field}
           placeholder={props.placeholder}
           id={field.name}
-          maxH="200px"
+          h="500px"
         />
       ) : (
         <Input {...field} {...props} id={field.name} />

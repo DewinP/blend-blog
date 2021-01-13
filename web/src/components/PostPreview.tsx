@@ -1,7 +1,8 @@
 import {
   Avatar,
+  Box,
+  Button,
   Flex,
-  Heading,
   IconButton,
   Stack,
   Text,
@@ -9,15 +10,28 @@ import {
 import React from "react";
 import { IPost } from "../interfaces";
 import { sinceDate } from "../utils/Dates";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { MdFavoriteBorder } from "react-icons/md";
+import { TiEdit, TiDelete } from "react-icons/ti";
+import NextLink from "next/link";
+import { useMutation, useQueryClient } from "react-query";
+import { deleteById } from "../api/postApi";
+
 interface PostPreviewProps {
   p: IPost;
 }
 
-export const PostPreview: React.FC<PostPreviewProps> = ({ p }) => {
+export const PostPreview: React.FC<PostPreviewProps> = ({ p, userPosts }) => {
+  let queryClient = useQueryClient();
+  let isOwner = userPosts?.find((post) => {
+    return post.id === p.id;
+  });
+  let { mutate: deletePost } = useMutation(deleteById);
+
   return (
-    <Stack p="10px" bgColor="grenish" borderRadius="8px">
+    <Stack
+      p="10px"
+      borderRadius="8px"
+      boxShadow="rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px"
+    >
       <Stack>
         <Flex align="center" justify="space-between">
           <Flex align="center">
@@ -29,21 +43,38 @@ export const PostPreview: React.FC<PostPreviewProps> = ({ p }) => {
               | {sinceDate(p.createdAt)}
             </Text>
           </Flex>
-          <Flex>
-            <IconButton
-              aria-label="favorite"
-              variant="ghost"
-              icon={<MdFavoriteBorder size="20px" />}
-            />
-            <IconButton
-              aria-label="edit options"
-              variant="ghost"
-              colorScheme="transparent"
-              icon={<BsThreeDotsVertical />}
-            />
-          </Flex>
+          {isOwner ? (
+            <Stack>
+              <NextLink href={`/posts/edit/${p.id}`}>
+                <IconButton
+                  aria-label="edit options"
+                  bgColor="teal"
+                  size="sm"
+                  icon={<TiEdit size="15px" />}
+                />
+              </NextLink>
+              <IconButton
+                aria-label="remove options"
+                size="sm"
+                icon={<TiDelete color="red" size="20px" />}
+                onClick={() =>
+                  deletePost(p.id, {
+                    onSuccess: () => {
+                      queryClient.invalidateQueries("posts");
+                    },
+                  })
+                }
+              />
+            </Stack>
+          ) : null}
         </Flex>
-        <Heading size="md"> {p.title}</Heading>
+        <Box>
+          <NextLink href={`/posts/${p.id}`}>
+            <Button size="xl" variant="link">
+              {p.title}
+            </Button>
+          </NextLink>
+        </Box>
         <Text>{p.body}</Text>
       </Stack>
       <Flex></Flex>

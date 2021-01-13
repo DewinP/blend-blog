@@ -8,14 +8,17 @@ import bodyParser from "body-parser";
 import { ORMConfig, PORT } from "./config";
 import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
+import userRoutes from "./routes/user.routes";
+import * as dotenv from "dotenv";
 
 const main = async () => {
+  dotenv.config();
   await createConnection(ORMConfig);
   const app = express()
     .use(morgan("dev"))
     .use(
       cors({
-        origin: "http://localhost:3000",
+        origin: process.env.CORS_ORIGIN,
         credentials: true,
       })
     )
@@ -23,7 +26,7 @@ const main = async () => {
     .use(bodyParser.json())
     .use(
       session({
-        secret: "cat",
+        secret: process.env.SESSION_SECRET || "secret",
         resave: false,
         saveUninitialized: true,
       })
@@ -31,7 +34,7 @@ const main = async () => {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/posts", postRoutes);
-
+  app.use("/api/users", userRoutes);
   app.listen(PORT, () => {
     console.log(`server started in https://localhost:${PORT}`);
   });

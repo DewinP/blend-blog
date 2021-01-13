@@ -3,13 +3,19 @@ import NextLink from "next/link";
 import React from "react";
 import { AuthMenu } from "./AuthMenu";
 import { NotAuthMenu } from "./NotAuthMenu";
-import { UserContext } from "../contexts/UserContext";
-import { IContextType } from "../interfaces";
+import { useQuery } from "react-query";
+import { meQuery } from "../api/authApi";
 interface NavbarProps {}
 
 export const Navbar: React.FC<NavbarProps> = ({}) => {
-  const { user } = React.useContext(UserContext) as IContextType;
-  let userInfo = user.user;
+  const { data, isLoading } = useQuery("me", meQuery);
+  let loggedIn;
+  if (!isLoading && !data) {
+    loggedIn = false;
+  }
+  if (data) {
+    loggedIn = true;
+  }
   return (
     <Flex
       h="50px"
@@ -32,7 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({}) => {
           </NextLink>
         </Flex>
         <Flex align="center">
-          {!userInfo ? <NotAuthMenu /> : <AuthMenu user={userInfo.username} />}
+          {loggedIn ? <AuthMenu user={data?.username} /> : <NotAuthMenu />}
         </Flex>
       </Flex>
     </Flex>

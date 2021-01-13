@@ -15,6 +15,8 @@ const theme = extendTheme({
     black: "#16161D",
     minigrey: "#f4f4f8",
     grenish: "#a3ddcb",
+    red: "#f05454",
+    skyblue: "#65d6ce",
   },
   background: "#f4f4f8",
   fonts,
