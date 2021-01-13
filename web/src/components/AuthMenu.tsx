@@ -18,14 +18,9 @@ export const AuthMenu: React.FC<AuthMenuProps> = ({ user }) => {
   let queryClient = useQueryClient();
   return (
     <Flex>
-      <NextLink href="/me">
+      <NextLink href="/">
         <Button colorScheme="teal" variant="ghost" size="sm" mr="40px">
           All posts
-        </Button>
-      </NextLink>
-      <NextLink href="/me">
-        <Button colorScheme="teal" variant="ghost" size="sm" mr="40px">
-          My Posts
         </Button>
       </NextLink>
       <NextLink href="/create-post">
